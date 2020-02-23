@@ -1,6 +1,6 @@
 <template>
   <div class="md-layout md-alignment-center-center">
-    <form novalidate class="md-layout md-alignment-center-center" @submit.prevent="validateAsset">
+    <form novalidate class="md-layout md-alignment-center-center" @keypress.enter="() => {}" @submit.enter.prevent="validateAsset">
       <md-card class="md-layout-item md-size-50 md-small-size-100">
         <md-card-header>
           <div class="md-title">Add new asset</div>
@@ -80,13 +80,13 @@
                   <md-card-media md-medium>
                     <img :src="file.preview" :alt="file.file.name" />
                   </md-card-media>
-                  <md-card-header class="md-flex">
-                    <md-card-header-text>
+                  <md-card-header class="md-flex" style="flex-direction: column">
+                    <md-card-header-text style="padding: 10px 0;">
                       <div
                         class="md-subtitle"
                       >{{file.file.name.substr(0, file.file.name.lastIndexOf('.'))}}</div>
                     </md-card-header-text>
-                    <md-card-header-text>
+                    <md-card-header-text style="padding: 10px 0;">
                       <div
                         class="md-subtitle"
                       >Format: {{file.file.name.substr(file.file.name.lastIndexOf('.') +1)}}</div>
@@ -106,11 +106,10 @@
         <md-progress-bar md-mode="indeterminate" v-if="sending" />
 
         <md-card-actions>
-          <md-button type="submit" class="md-primary" :disabled="sending">Create Asset</md-button>
+          <md-button type="submit" class="md-primary" :disabled="sending || !validateAssetForm(form)">Create Asset</md-button>
         </md-card-actions>
       </md-card>
 
-      <md-snackbar :md-active.sync="userSaved">The user {{ lastUser }} was saved with success!</md-snackbar>
       <md-snackbar :md-active.sync="err.err">{{err.msg}}</md-snackbar>
     </form>
   </div>
@@ -118,13 +117,12 @@
 
 <script>
 import formValidationMixin from "@/mixins/formValidationMixin";
-import { mapGetters } from "vuex";
+import { mapGetters, mapActions } from "vuex";
 export default {
   mixins: [formValidationMixin],
   data() {
     return {
       form: { tags: [], files: [] },
-      userSaved: false,
       sending: false,
       filesToUpload: [],
       filesPreviews: [],
@@ -136,6 +134,7 @@ export default {
     this.form.owner = this.User.email;
   },
   methods: {
+    ...mapActions(['addAsset']),
     async handleNewFiles() {
       console.log(this.filesToUpload);
       if (this.filesToUpload.length > 0)
@@ -180,15 +179,17 @@ export default {
         };
       });
     },
-    validateAsset() {
-      if (this.form.owner != null) return;
+    validateAsset(e) {
+      console.log(e);
+      if(e.keyCode == 13) return;
+      if (this.form.owner == null) return;
 
-      if (!this.validateRegistrationForm(this.form)) {
-        this.err = { msg: "Form is not complete", err: true };
+      if (!this.validateAssetForm(this.form)) {
+        // this.err = { msg: "Form is not complete", err: true };
 
-        setTimeout(() => {
-          this.err.err = false;
-        }, 3000);
+        // setTimeout(() => {
+        //   this.err.err = false;
+        // }, 3000);
 
         return;
       }
@@ -196,9 +197,12 @@ export default {
       this.sending = true;
 
       setTimeout(() => {
-        this.userSaved = true;
         this.sending = false;
-        this.$emit("register", this.form);
+        this.addAsset(this.form);
+
+        this.form = { tags: [], files: [] };
+        this.$router.push('/');
+
       }, 2000);
     }
   },

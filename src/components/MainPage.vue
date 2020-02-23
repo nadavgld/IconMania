@@ -1,9 +1,12 @@
 <template>
   <div class="page-height">
-    <md-autocomplete v-model="iconSearch" :md-options="icons" :md-open-on-focus="false" md-layout="box" md-dense>
+    <md-autocomplete v-model="iconSearch" @md-changed="changeIconQuery" :md-options="icons" :md-open-on-focus="false" md-layout="box" md-dense>
       <label>Icon search</label>
     </md-autocomplete>
 
+  <div v-for="icon of icons" :key="icon.id">
+    {{icon}}
+  </div>
     <md-button class="md-fab md-primary float-button float-bottom-right" @click="$router.push('/add')">
       <md-icon>add</md-icon>
     </md-button>
@@ -11,28 +14,27 @@
 </template>
 
 <script>
+import {mapGetters} from "vuex";
+
 export default {
   name: "MainPage",
   data() {
     return {
       iconSearch: null,
       icons: [
-        "Jim Halpert",
-        "Dwight Schrute",
-        "Michael Scott",
-        "Pam Beesly",
-        "Angela Martin",
-        "Kelly Kapoor",
-        "Ryan Howard",
-        "Kevin Malone",
-        "Creed Bratton",
-        "Oscar Nunez",
-        "Toby Flenderson",
-        "Stanley Hudson",
-        "Meredith Palmer",
-        "Phyllis Lapin-Vance"
       ]
     };
+  },
+  computed: {
+    ...mapGetters(['getIconBySearch'])
+  },
+  methods: {
+    changeIconQuery(q){
+      const results = this.getIconBySearch(q);
+
+      console.log(results);
+      this.icons = results;
+    }
   }
 };
 </script>

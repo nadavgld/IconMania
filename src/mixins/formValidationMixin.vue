@@ -6,6 +6,16 @@ export default {
     };
   },
   methods: {
+    validateAssetForm(form){
+      if (!form.assetName || form.assetName.trim().length < 2) return false;
+      if (!form.owner || form.owner.trim().length < 2) return false;
+      if (!form.product || form.product.trim().length == 0) return false;
+      if (!form.type || form.type.trim().length < 2) return false;
+      if (!form.files || form.files.length <= 0) return false;
+      if (!form.tags || form.tags.length <= 0) return false;
+
+      return true;
+    },
     validateRegistrationForm(form) {
       if (!form.lastName || form.lastName.trim().length < 2) return false;
       if (!form.firstName || form.firstName.trim().length < 2) return false;
